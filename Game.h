@@ -5,6 +5,9 @@
 #include <string>
 #include <vector>
 #include <queue>
+#include <algorithm>
+#include <chrono>
+#include <random>
 
 using namespace std; 
 
@@ -14,7 +17,7 @@ class Game
     Game(); // constructor
    // ~Game(); // destructor.. not currently dynamically allocating anything?? 
     
-    bool checkSequence(int player);
+    bool checkSequence(int player, int x, int y);
 
     bool drawCard(int player); 
 
@@ -22,6 +25,7 @@ class Game
      * Uses the look up table to determine what positions 
      * Checks to see which position are free
      * If both positions are free, then determines the position by a coin toss 
+     * There will be no dead cards 
      */ 
     void playCard(int player); 
 
@@ -34,16 +38,27 @@ class Game
      * Initalizing the gameboard 
      */ 
     void setUpGame();
+
     void setUpBoard(); 
+
     void createDeck(); 
+    void dealInitalCards(); 
+    void shuffleAndEnqueueCards();
+
+    void createMapping(); 
+    
     vector<vector<int>> gameboard;
     queue<int> shuffledDeck; 
     queue<int> player1Cards;
     queue<int> player2Cards; 
+    vector<vector<pair<int, int>>> cardMapping; 
 
-    bool checkVertical(int player);
-    bool checkHorizontal(int player);
-    bool checkDiagonal(int player); 
+    bool checkVertical(int player, int y);
+    bool checkHorizontal(int player, int x);
+    bool checkDiagonal(int player, int x, int y); 
+
+
+    bool placeToken(int player, pair<int, int> location)
     
 
 
