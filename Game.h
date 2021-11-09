@@ -15,60 +15,52 @@ class Game
 {
     public:
     Game(); // constructor
+    Game(int n); 
    // ~Game(); // destructor.. not currently dynamically allocating anything?? 
-    
-    bool checkSequence(int player, int x, int y);
+    bool isDeckEmpty(); 
+
+    bool checkSequence(int player);
 
     bool drawCard(int player); 
 
-    /**
-     * Uses the look up table to determine what positions 
-     * Checks to see which position are free
-     * If both positions are free, then determines the position by a coin toss 
-     * There will be no dead cards 
-     */ 
+   
     void playCard(int player); 
 
+    int getConditionPlayer(); 
+
+    void printPlayerCards(int player); 
+
     private:
-    /**
-     * To be called in the constructor
-     * Takes care of dealing inital cards
-     * Shuffling the deck
-     * Populating the lookup table
-     * Initalizing the gameboard 
-     */ 
-    void setUpGame();
 
-    void setUpBoard(); 
-
-    void createDeck(); 
-    void dealInitalCards(); 
-    void shuffleAndEnqueueCards();
-
-    void createMapping(); 
-    
+     // instance variables 
     vector<vector<int>> gameboard;
     queue<int> shuffledDeck; 
     queue<int> player1Cards;
     queue<int> player2Cards; 
     vector<vector<pair<int, int>>> cardMapping; 
 
+    int conditionPlayer; 
+    pair<int, int> lastPlacedToken; 
+   
+    void setUpGameAny();
+    void setUpGameCondition();
+
+    void setUpBoard(); 
+
+    void createDeckAndDealAny(); 
+    void createDeckAndDealCondition(); 
+    
+    void createMapping(); 
+    
+   
+    // check sequence helper functions 
     bool checkVertical(int player, int y);
     bool checkHorizontal(int player, int x);
     bool checkDiagonal(int player, int x, int y); 
 
 
-    bool placeToken(int player, pair<int, int> location)
+    bool placeToken(int player, pair<int, int> location); 
     
-
-
-
-    
-
-
-
-
-
 }; 
 
 #endif 
