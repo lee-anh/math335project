@@ -18,17 +18,18 @@ class Game
     Game(int n); 
    // ~Game(); // destructor.. not currently dynamically allocating anything?? 
     bool isDeckEmpty(); 
-
+    bool isPlayerEmpty(); 
     bool checkSequence(int player);
 
     bool drawCard(int player); 
 
    
     void playCard(int player); 
-
     int getConditionPlayer(); 
 
     void printPlayerCards(int player); 
+
+    void printBoard(); 
 
     private:
 
@@ -41,6 +42,8 @@ class Game
 
     int conditionPlayer; 
     pair<int, int> lastPlacedToken; 
+    int sequenceLength; 
+    int conditionCards; 
    
     void setUpGameAny();
     void setUpGameCondition();
