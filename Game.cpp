@@ -1,11 +1,11 @@
 #include "Game.h"
-
+// constructor 
 Game::Game(){
     setUpGameAny(); 
     
-
 }
 
+// constructor #2 
 Game::Game(int n){
     conditionCards = n; 
     setUpGameCondition(); 
@@ -125,18 +125,21 @@ void Game::createDeckAndDealCondition(){
     }
 
 
-    // choose 5 cards from the chosen suit 
+    // choose # cards from the chosen suit 
     uniform_int_distribution<int> uni2(min, max);
-        // cannot get the same number more than twice... keep drawing until you get that? 
+        // cannot get the same number more than twice... keep drawing until you get that
         int drawn_cards = 0; 
         while(drawn_cards < conditionCards){
             int rand_int = uni2 (rng);
             int counter = 0; 
+            
+            // how many times have I drawn that card already 
             for(int j = 0; j <  (int) conditionPlayerCards.size(); j++){
                 if(conditionPlayerCards.at(j) == rand_int){
                     counter++; 
                 }
             } 
+            // this card has not been drawn more than twice 
             if(counter < 2){
                 conditionPlayerCards.push_back(rand_int); 
                 drawn_cards++; 
@@ -483,8 +486,8 @@ bool Game::checkVertical(int player, int y){
     
 }
 
-bool Game::checkHorizontal(int player, int y){
-    vector<int> row = gameboard.at(y); 
+bool Game::checkHorizontal(int player, int x){
+    vector<int> row = gameboard.at(x); 
     int counter = 0; 
     for(int i = 0; i < (int) row.size(); i++){
         if(row.at(i) == 3 || i == player){

@@ -16,7 +16,10 @@ class Game
     public:
     Game(); // constructor
     Game(int n); 
+
+
    // ~Game(); // destructor.. not currently dynamically allocating anything?? 
+    
     bool isDeckEmpty(); 
     bool isPlayerEmpty(); 
     bool checkSequence(int player);
