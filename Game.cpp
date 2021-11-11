@@ -1,16 +1,17 @@
 #include "Game.h"
-// constructor 
+// constructor for when we are keeping track of player order
 Game::Game(){
     setUpGameAny(); 
     
 }
 
-// constructor #2 
+// constructor #2 for when we are keeping track of intial hand 
 Game::Game(int n){
     conditionCards = n; 
     setUpGameCondition(); 
    
 }
+
 
 void Game::setUpGameAny(){
     setUpBoard(); 
@@ -32,6 +33,7 @@ void Game::setUpGameCondition(){
 }
 
 
+
 void Game::setUpBoard(){
     // gameboard of all 0s; 
     gameboard = vector<vector<int>>();
@@ -43,12 +45,17 @@ void Game::setUpBoard(){
         gameboard.push_back(temp); 
     }
 
-    // wildcards 
+    // wildcards = 3 
     gameboard[0][0] = 3;
     gameboard[0][9] = 3;
     gameboard[9][0] = 3;
     gameboard[9][9] = 3; 
 
+    // board key will be: 
+    // 0 = empty
+    // 1 = player 1 token
+    // 2 = player 2 token
+    // 3 = wildcard 
 
 }
 
@@ -62,10 +69,11 @@ void Game::createDeckAndDealAny(){
         temp.push_back(i); 
     }
 
+    // shuffle the deck 
     unsigned seed = chrono::system_clock::now().time_since_epoch().count();
     shuffle(temp.begin(), temp.end(), default_random_engine(seed)); 
 
-    // put everything in the queue
+    // put everything in the shuffledDeck queue
     for(int i = 0; i < (int) temp.size(); i++){
         shuffledDeck.push(temp.at(i)); 
     }
@@ -98,7 +106,6 @@ void Game::createDeckAndDealCondition(){
     random_device rd;
     mt19937 rng(rd()); 
     uniform_int_distribution<int> uni(0, 3); 
-    // might need to do: auto random_integer = uni(rng); instead
     int random_integer = uni (rng); 
 
     int min = 0; 
@@ -133,13 +140,13 @@ void Game::createDeckAndDealCondition(){
             int rand_int = uni2 (rng);
             int counter = 0; 
             
-            // how many times have I drawn that card already 
+            // how many times have I drawn that card already? 
             for(int j = 0; j <  (int) conditionPlayerCards.size(); j++){
                 if(conditionPlayerCards.at(j) == rand_int){
                     counter++; 
                 }
             } 
-            // this card has not been drawn more than twice 
+            // this card has not been drawn more than twice, so add it to the conditionPlayerHands 
             if(counter < 2){
                 conditionPlayerCards.push_back(rand_int); 
                 drawn_cards++; 
@@ -153,37 +160,38 @@ void Game::createDeckAndDealCondition(){
     // shuffle and enqueue the deck 
     for(int i = 0; i < 48; i++){
         int toPush = 2; 
+        // chck to see if the card is already dealt to the conditionPlayer
         for(int j = 0; j < (int) conditionPlayerCards.size(); j++){
             if(conditionPlayerCards.at(j) == i){
                 toPush--; 
             }
         }
-
+        // push the card for how many times it has not been dealt to the conditionPlayer
         for(int j = 0; j < toPush; j++){
             temp_deck.push_back(i); 
         }
     }
 
+    // shuffled deck 
     unsigned seed = chrono::system_clock::now().time_since_epoch().count();
     shuffle(temp_deck.begin(), temp_deck.end(), default_random_engine(seed)); 
 
-    // put everything in the queue
+    // put everything in the shuffledDeck queue
     for(int i = 0; i < (int) temp_deck.size(); i++){
         shuffledDeck.push(temp_deck.at(i)); 
     }
 
-    // set the condition player and push their cards to their hand 
-     // decide which player 
+    // decide which player will be the condition player 
     uniform_int_distribution<int> uni3(0, 1);
     int rand_int3 = uni3(rng); 
     if(rand_int3 == 0){
         conditionPlayer = 1; 
-        // enquue 
+        // enqueue all of their cards 
         for(int i = 0; i < (int) conditionPlayerCards.size(); i++){
             player1Cards.push(conditionPlayerCards.at(i)); 
         }
         
-        // draw additional cards 
+        // draw any additional cards 
         for(int i = 0; i < (7-conditionCards); i++){
             int cardDrawn = shuffledDeck.front();
             shuffledDeck.pop(); 
@@ -192,12 +200,12 @@ void Game::createDeckAndDealCondition(){
         
     } else {
         conditionPlayer = 2; 
-        // enque 
+        // enque all of their cards 
          for(int i = 0; i < (int) conditionPlayerCards.size(); i++){
             player2Cards.push(conditionPlayerCards.at(i)); 
         }
         
-        // draw additional cards 
+        // draw any dditional cards 
         for(int i = 0; i < (7-conditionCards); i++){
             int cardDrawn = shuffledDeck.front();
             shuffledDeck.pop(); 
@@ -457,7 +465,7 @@ bool Game::checkSequence(int player){
     bool horizontal = checkHorizontal(player, x); 
     bool diagonal = checkDiagonal(player, x, y); 
 
-    // I think this syntax is ok?
+
     if(vertical || horizontal || diagonal){
         return true; 
     } 
@@ -468,7 +476,7 @@ bool Game::checkSequence(int player){
 
 bool Game::checkVertical(int player, int y){
     int counter = 0; 
-    // for each row 
+    // for row, access the correct column 
     for(int row = 0; row < (int)gameboard.size(); row++){
         int col = gameboard.at(row).at(y); 
         if(col == 3 || col == player){
@@ -489,6 +497,7 @@ bool Game::checkVertical(int player, int y){
 bool Game::checkHorizontal(int player, int x){
     vector<int> row = gameboard.at(x); 
     int counter = 0; 
+    // for each row, start at the beginning 
     for(int i = 0; i < (int) row.size(); i++){
         if(row.at(i) == 3 || i == player){
             counter++; 
@@ -507,13 +516,14 @@ bool Game::checkHorizontal(int player, int x){
 }
 
 bool Game::checkDiagonal(int player, int x, int y){
-    // get x and y to the corner most position 
+    // get x and y to the left most position it can go 
     while(x > 0  && y > 0){
         x--; 
         y--; 
     }
 
     int counter = 0 ;
+    // terminate before x or y get out of bounds 
     while(x < (int) gameboard.size() && y  < (int) gameboard.size()){
         if(gameboard[x][y] == 3 || gameboard[x][y] == player){
             counter++; 
@@ -534,12 +544,16 @@ bool Game::checkDiagonal(int player, int x, int y){
 
 
 bool Game::drawCard(int player){
+    // if the deck is empty, return false 
     if(shuffledDeck.size() == 0){
         return false; 
     }
+
+    // pop from shuffledDeck queue 
     int card = shuffledDeck.front(); 
     shuffledDeck.pop(); 
 
+    // add to the correct player's card 
     if(player == 1){
         player1Cards.push(card); 
     } else if (player == 2){
@@ -550,6 +564,7 @@ bool Game::drawCard(int player){
 }
 
 void Game::playCard(int player){
+    // determine whose cards to play from 
     queue<int> *playerCards; 
     if(player == 1){
         playerCards = &(player1Cards); 
@@ -561,18 +576,54 @@ void Game::playCard(int player){
 
     int card = playerCards->front(); 
         playerCards->pop(); 
-        // TODO: look up the card here
-        pair<int, int> position = cardMapping.at(card).at(0); 
 
-        // TODO: Randomize choosing between position 1 and position 2
-        bool pos1Result = placeToken(player, position); 
-        //cout << "Pos1Result: " <<  pos1Result << endl; 
-        if(pos1Result == false){
-            // position1 has been taken, try position2
-            position = cardMapping.at(card).at(1); 
-            placeToken(player, position); 
+        /*
+        // faster, without randomization 
+        // look up the card 
+            pair<int, int> position = cardMapping.at(card).at(0); 
+            bool pos1Result = placeToken(player, position); 
+            //cout << "Pos1Result: " <<  pos1Result << endl; 
+            if(pos1Result == false){
+                // position1 has been taken, try position2
+                position = cardMapping.at(card).at(1); 
+                placeToken(player, position); 
             //cout << "Played at pos2" << endl; 
+            }
+        */
+
+        // with randomization on position 1 or 2 
+        random_device rd;
+        mt19937 rng(rd()); 
+        uniform_int_distribution<int> uni(0, 1); 
+        // might need to do: auto random_integer = uni(rng); instead
+        int random_integer = uni (rng); 
+        if(random_integer == 0){
+            // look up the card 
+            pair<int, int> position = cardMapping.at(card).at(0); 
+            bool pos1Result = placeToken(player, position); 
+            //cout << "Pos1Result: " <<  pos1Result << endl; 
+            if(pos1Result == false){
+                // position1 has been taken, try position2
+                position = cardMapping.at(card).at(1); 
+                placeToken(player, position); 
+            //cout << "Played at pos2" << endl; 
+            }
+
+        } else {
+            // look up the card 
+            pair<int, int> position = cardMapping.at(card).at(1); 
+            bool pos2Result = placeToken(player, position); 
+            //cout << "Pos1Result: " <<  pos1Result << endl; 
+            if(pos2Result == false){
+                // position2 has been taken, try position1
+                position = cardMapping.at(card).at(0); 
+                placeToken(player, position); 
+                //cout << "Played at pos2" << endl; 
+            }
+
         }
+        
+        
 }
 
 int Game::getConditionPlayer(){
@@ -598,6 +649,7 @@ void Game::printPlayerCards(int player){
 
 bool Game::placeToken(int player, pair<int, int> location){
     //cout << "Test: " << location.first << ", " << location.second << endl; 
+    // update the gameboard 
     if(gameboard[location.first][location.second] == 0){
         gameboard[location.first][location.second] = player; 
        // cout << "Player " << player << " played at " << location.first << ", " << location.second << endl; 

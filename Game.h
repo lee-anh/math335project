@@ -18,7 +18,7 @@ class Game
     Game(int n); 
 
 
-   // ~Game(); // destructor.. not currently dynamically allocating anything?? 
+   // ~Game(); // destructor.. currently don't need
     
     bool isDeckEmpty(); 
     bool isPlayerEmpty(); 
@@ -48,14 +48,12 @@ class Game
     int sequenceLength; 
     int conditionCards; 
    
+    // set up helper functions
     void setUpGameAny();
     void setUpGameCondition();
-
     void setUpBoard(); 
-
     void createDeckAndDealAny(); 
     void createDeckAndDealCondition(); 
-    
     void createMapping(); 
     
    
@@ -64,7 +62,7 @@ class Game
     bool checkHorizontal(int player, int x);
     bool checkDiagonal(int player, int x, int y); 
 
-
+    // play card helper function 
     bool placeToken(int player, pair<int, int> location); 
     
 }; 
