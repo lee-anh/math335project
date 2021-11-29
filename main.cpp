@@ -8,15 +8,15 @@ int main(void){
    
     // n = # of times to run the simulation 
     
-    int n = 1000; 
+    int n = 10000; 
     int counter = 0; // count the number of times the condition turns out
     int draw = 0; // just for our records 
 
     
 
     for(int i = 0; i < n; i ++){
-        //Game *g = new Game(7); // we care about inital hand
-        Game *g = new Game(); // we care about player 1
+       Game *g = new Game(7); // we care about inital hand
+       // Game *g = new Game(); // we care about player 1
         bool player1Win = false;
         bool player2Win = false; 
         int round = 0; 
@@ -29,7 +29,7 @@ int main(void){
             // check for a sequence
             if(g->checkSequence(1)){
                 // player 1 has won 
-               // g->printBoard(); 
+                //g->printBoard(); 
                 player1Win = true; 
                 break; 
             }
@@ -40,13 +40,13 @@ int main(void){
             g->playCard(2);
             if(g->checkSequence(2)){
                 // player 1 has won 
-               // g->printBoard(); 
+                //g->printBoard(); 
                 player2Win = true; 
                 break; 
             }
             g->drawCard(2); 
             //cout << "Round: " << round << endl; 
-           // g->printBoard(); 
+            //g->printBoard(); 
             round++; 
             
            // g->printPlayerCards(1); 

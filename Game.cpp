@@ -80,15 +80,17 @@ void Game::createDeckAndDealAny(){
 
     // deal 7 cards to each player
     for(int i = 0; i < 7; i++){
+        
+
+        // one card to player 2
+        int p2 = shuffledDeck.front(); 
+        shuffledDeck.pop(); 
+        player2Cards.push_back(p2); 
+
         // one card to player 1 
         int p1 = shuffledDeck.front(); 
         shuffledDeck.pop(); 
-        player1Cards.push(p1); 
-
-        // one cad to player 2
-        int p2 = shuffledDeck.front(); 
-        shuffledDeck.pop(); 
-        player2Cards.push(p2); 
+        player1Cards.push_back(p1); 
 
     }
 
@@ -188,28 +190,28 @@ void Game::createDeckAndDealCondition(){
         conditionPlayer = 1; 
         // enqueue all of their cards 
         for(int i = 0; i < (int) conditionPlayerCards.size(); i++){
-            player1Cards.push(conditionPlayerCards.at(i)); 
+            player1Cards.push_back(conditionPlayerCards.at(i)); 
         }
         
         // draw any additional cards 
         for(int i = 0; i < (7-conditionCards); i++){
             int cardDrawn = shuffledDeck.front();
             shuffledDeck.pop(); 
-            player1Cards.push(cardDrawn); 
+            player1Cards.push_back(cardDrawn); 
         }
         
     } else {
         conditionPlayer = 2; 
         // enque all of their cards 
          for(int i = 0; i < (int) conditionPlayerCards.size(); i++){
-            player2Cards.push(conditionPlayerCards.at(i)); 
+            player2Cards.push_back(conditionPlayerCards.at(i)); 
         }
         
         // draw any dditional cards 
         for(int i = 0; i < (7-conditionCards); i++){
             int cardDrawn = shuffledDeck.front();
             shuffledDeck.pop(); 
-            player2Cards.push(cardDrawn); 
+            player2Cards.push_back(cardDrawn); 
         }
         
     }
@@ -222,7 +224,7 @@ void Game::createDeckAndDealCondition(){
         for(int i = 0; i < 7; i++){
             int cardDrawn = shuffledDeck.front(); 
             shuffledDeck.pop(); 
-            player2Cards.push(cardDrawn); 
+            player2Cards.push_back(cardDrawn); 
         }
 
     } else {
@@ -230,7 +232,7 @@ void Game::createDeckAndDealCondition(){
         for(int i = 0; i < 7; i++){
             int cardDrawn = shuffledDeck.front(); 
             shuffledDeck.pop(); 
-            player1Cards.push(cardDrawn); 
+            player1Cards.push_back(cardDrawn); 
         }
     }
 
@@ -461,9 +463,9 @@ bool Game::isPlayerEmpty(){
 bool Game::checkSequence(int player){
     int x = lastPlacedToken.first;
     int y = lastPlacedToken.second; 
-    bool vertical = checkVertical(player, y); 
-    bool horizontal = checkHorizontal(player, x); 
-    bool diagonal = checkDiagonal(player, x, y); 
+    bool vertical = checkVertical(player, y, sequenceLength); 
+    bool horizontal = checkHorizontal(player, x, sequenceLength); 
+    bool diagonal = checkDiagonal(player, x, y, sequenceLength); 
 
 
     if(vertical || horizontal || diagonal){
@@ -473,8 +475,20 @@ bool Game::checkSequence(int player){
 
 }
 
+bool Game::checkSequence(int player, int x, int y, int seq){
 
-bool Game::checkVertical(int player, int y){
+    bool vertical = checkVertical(player, y, seq); 
+    bool horizontal = checkHorizontal(player, x, seq); 
+    bool diagonal = checkDiagonal(player, x, y, seq); 
+
+
+    if(vertical || horizontal || diagonal){
+        return true; 
+    } 
+    return false; 
+}
+
+bool Game::checkVertical(int player, int y, int seq){
     int counter = 0; 
     // for row, access the correct column 
     for(int row = 0; row < (int)gameboard.size(); row++){
@@ -485,7 +499,7 @@ bool Game::checkVertical(int player, int y){
             counter = 0; 
         }
 
-        if(counter == sequenceLength){
+        if(counter == seq){
             return true;
         }
     }
@@ -494,7 +508,7 @@ bool Game::checkVertical(int player, int y){
     
 }
 
-bool Game::checkHorizontal(int player, int x){
+bool Game::checkHorizontal(int player, int x, int seq){
     vector<int> row = gameboard.at(x); 
     int counter = 0; 
     // for each row, start at the beginning 
@@ -506,7 +520,7 @@ bool Game::checkHorizontal(int player, int x){
             counter = 0; 
         }
 
-        if(counter == sequenceLength){
+        if(counter == seq){
             return true; 
         }
 
@@ -515,7 +529,7 @@ bool Game::checkHorizontal(int player, int x){
     return false; 
 }
 
-bool Game::checkDiagonal(int player, int x, int y){
+bool Game::checkDiagonal(int player, int x, int y, int seq){
     // get x and y to the left most position it can go 
     while(x > 0  && y > 0){
         x--; 
@@ -531,7 +545,7 @@ bool Game::checkDiagonal(int player, int x, int y){
             counter = 0; 
         }
 
-        if(counter == sequenceLength){
+        if(counter == seq){
             return true; 
         } 
         x++; 
@@ -555,9 +569,9 @@ bool Game::drawCard(int player){
 
     // add to the correct player's card 
     if(player == 1){
-        player1Cards.push(card); 
+        player1Cards.push_back(card); 
     } else if (player == 2){
-        player2Cards.push(card); 
+        player2Cards.push_back(card); 
     } 
 
     return true; 
@@ -565,7 +579,7 @@ bool Game::drawCard(int player){
 
 void Game::playCard(int player){
     // determine whose cards to play from 
-    queue<int> *playerCards; 
+    vector<int> *playerCards; 
     if(player == 1){
         playerCards = &(player1Cards); 
 
@@ -574,8 +588,18 @@ void Game::playCard(int player){
 
     }
 
-    int card = playerCards->front(); 
-        playerCards->pop(); 
+    
+
+    pair<int, int> optimalInfo = optimalMove(player); 
+
+    int card = playerCards->at(optimalInfo.first);  
+    playerCards->erase(playerCards->begin() + optimalInfo.first); // 0 can be replace with an array index 
+    
+    placeToken(player, cardMapping.at(card).at(optimalInfo.second)); 
+        // TODO: here is where the strategy comes into play: 
+        // check all your cards and check if you can make a sequence of 5 if not 4, if not 3, etc. 
+        // play the card that will result in the highest sequence
+        // if there is a tie, then pick the one with th elower array index (it was drawn earlier)
 
         /*
         // faster, without randomization 
@@ -591,6 +615,7 @@ void Game::playCard(int player){
             }
         */
 
+       /*
         // with randomization on position 1 or 2 
         random_device rd;
         mt19937 rng(rd()); 
@@ -622,6 +647,7 @@ void Game::playCard(int player){
             }
 
         }
+        */
         
         
 }
@@ -631,7 +657,7 @@ int Game::getConditionPlayer(){
 }
 
 void Game::printPlayerCards(int player){
-    queue<int> temp; 
+    vector<int> temp; 
     if(player == 1){
         temp = player1Cards; 
     } else if (player == 2){
@@ -639,12 +665,102 @@ void Game::printPlayerCards(int player){
     }
     cout << "Player " << player << " cards: "; 
     for(int i = 0; i < 7; i++){
-        int toPrint = temp.front(); 
+        int toPrint = temp.at(i); 
         cout << toPrint << " "; 
-        temp.pop(); 
-        temp.push(toPrint); 
+        
     }
     cout << endl; 
+}
+
+// returns a pair pair->first is the index with the max sequence for pair->second either 0 or 1 to play that card to acheive the maximum sequence 
+pair<int, int> Game::optimalMove(int player){
+    vector<int> cards; 
+    if(player == 1){
+        cards = player1Cards; 
+
+    } else {
+        cards = player2Cards; 
+    }
+
+    pair<int, int> originalLastPlacedToken = lastPlacedToken; 
+
+    int maxRank = 0; 
+    int maxRankIndex = -1; 
+    int higherRankCard = -1; 
+
+    pair<int, int> toReturn = make_pair<int, int>(0, 0); 
+
+    for(int i = 0; i < (int) cards.size(); i++){
+        pair<int, int> firstPos = cardMapping.at(cards[i]).at(0); 
+        pair<int, int> secondPos = cardMapping.at(cards[i]).at(1); 
+
+        int maxBtwnLocs = 0; 
+        int higherRankCardBtwnLocs= -1; 
+
+        if(placeToken(player, firstPos) == true){
+          
+            for(int i = 5; i > 0 ; i--){
+                bool result = checkSequence(player, firstPos.first, firstPos.second, i); 
+                if(result == true){
+                    if(i > maxBtwnLocs){
+                        maxBtwnLocs = i; 
+                        higherRankCardBtwnLocs = 0;  
+                    }
+                    break; 
+                }
+                
+            }
+            // restore the gameboard 
+            //gameboard[lastPlacedToken.first][lastPlacedToken.second] = 0; 
+            gameboard[firstPos.first][firstPos.second] = 0; 
+        }
+
+
+        if(placeToken(player, secondPos) == true){
+          
+            for(int i = 5; i > 0 ; i--){
+                bool result = checkSequence(player, secondPos.first, secondPos.second, i); 
+                if(result == true){
+                    if(i > maxBtwnLocs){
+                        maxBtwnLocs = i ;  
+                        higherRankCardBtwnLocs = 1; 
+                    }
+                    break; 
+                }
+                
+            }
+            // restore the gameboard 
+           // gameboard[lastPlacedToken.first][lastPlacedToken.second] = 0; 
+           gameboard[secondPos.first][secondPos.second] = 0; 
+        }
+
+        if(maxBtwnLocs > maxRank){
+            maxRank = maxBtwnLocs; 
+            maxRankIndex = i; 
+            higherRankCard = higherRankCardBtwnLocs; 
+        }
+    
+        // look up first position 
+        // look up second position 
+        // for each set, 
+        // for each position, if place token = false, then rank is 0 
+        // else check sequences of 5, 4, 3, 2, 1 
+        // decide the max rank between the 2 cards. 
+
+        // Think about edge case: I think the edge case is taken care of because if we can't find a sequence by placing the token, then it will get a rank of 1 
+        // Also, how do we pseudo place something on the board? 
+        // Maybe update the gameboard but then change it back using the lastPlaced Token 
+
+
+    }
+
+
+    toReturn.first = maxRankIndex; 
+    toReturn.second = higherRankCard; 
+
+    // restore the lastPlacedToken info 
+    lastPlacedToken = originalLastPlacedToken; 
+    return toReturn; // might have to make that a pointer
 }
 
 bool Game::placeToken(int player, pair<int, int> location){

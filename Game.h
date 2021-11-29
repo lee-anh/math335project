@@ -39,8 +39,8 @@ class Game
      // instance variables 
     vector<vector<int>> gameboard;
     queue<int> shuffledDeck; 
-    queue<int> player1Cards;
-    queue<int> player2Cards; 
+    vector<int> player1Cards;
+    vector<int> player2Cards; 
     vector<vector<pair<int, int>>> cardMapping; 
 
     int conditionPlayer; 
@@ -58,11 +58,13 @@ class Game
     
    
     // check sequence helper functions 
-    bool checkVertical(int player, int y);
-    bool checkHorizontal(int player, int x);
-    bool checkDiagonal(int player, int x, int y); 
+    bool checkSequence(int player, int x, int y, int seq); 
+    bool checkVertical(int player, int y, int seq);
+    bool checkHorizontal(int player, int x, int seq);
+    bool checkDiagonal(int player, int x, int y, int seq); 
 
     // play card helper function 
+    pair<int, int> optimalMove(int player);
     bool placeToken(int player, pair<int, int> location); 
     
 }; 
