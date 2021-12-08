@@ -29,6 +29,7 @@ class Game
    
     void playCard(int player); 
     int getConditionPlayer(); 
+    int getNumberOfMoves(); 
 
     void printPlayerCards(int player); 
 
@@ -47,6 +48,7 @@ class Game
     pair<int, int> lastPlacedToken; 
     int sequenceLength; 
     int conditionCards; 
+
    
     // set up helper functions
     void setUpGameAny();
@@ -66,6 +68,7 @@ class Game
     // play card helper function 
     pair<int, int> optimalMove(int player);
     bool placeToken(int player, pair<int, int> location); 
+    
     
 }; 
 
