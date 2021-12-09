@@ -13,14 +13,12 @@ int main(void){
     int draw = 0; // just for our records 
     int roundSum = 0; 
 
-    
-
     for(int i = 0; i < n; i ++){
-        //Game *g = new Game(4); // we care about inital hand
+        Game *g = new Game(7); // we care about inital hand
         // interesting that making it Game(0) makes the probability essential 50-50 (that is just reliant on which player gets chosen as the conditioned player)
         // but then when we try to use the below constructor, 
         // we get an issue where the number of condition successes is lower than expected 
-        Game *g = new Game(); // we care about player 1
+        //Game *g = new Game(); // we care about player 1
         bool player1Win = false;
         bool player2Win = false; 
         int round = 0; 

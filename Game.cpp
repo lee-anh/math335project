@@ -35,7 +35,6 @@ void Game::setUpGameCondition(){
 }
 
 
-
 void Game::setUpBoard(){
     // gameboard of all 0s; 
     gameboard = vector<vector<int>>();
@@ -491,21 +490,6 @@ bool Game::checkSequence(int player, int x, int y, int seq){
     bool diagonal = checkDiagonal(player, x, y, seq); 
 
     
-    /*
-    if(vertical || horizontal || diagonal){
-        if(vertical){
-            cout << "vertical "; 
-        } 
-        if (horizontal){
-            cout << "horizontal "; 
-        } 
-        if (diagonal) {
-            cout << "diagonal"; 
-        }
-        cout << endl; 
-        return true; 
-    } 
-    */
    if(vertical || horizontal || diagonal){
         return true; 
     } 
@@ -603,21 +587,49 @@ bool Game::drawCard(int player){
 
 void Game::playCard(int player){
     // determine whose cards to play from 
-    /*
-    vector<int> *playerCards; 
+
+     vector<int> *playerCards; 
     if(player == 1){
         playerCards = &(player1Cards); 
-
     } else if (player == 2){
         playerCards = &(player2Cards); 
-
     }
-    */
+   
 
-
-    
-    // with optimization: 
-
+   int card = playerCards->front(); 
+    playerCards->erase(playerCards->begin()); 
+        // with randomization on position 1 or 2 
+        random_device rd;
+        mt19937 rng(rd()); 
+        uniform_int_distribution<int> uni(0, 1); 
+        // might need to do: auto random_integer = uni(rng); instead
+        int random_integer = uni (rng); 
+        if(random_integer == 0){
+            // look up the card 
+            pair<int, int> position = cardMapping.at(card).at(0); 
+            bool pos1Result = placeToken(player, position); 
+            //cout << "Pos1Result: " <<  pos1Result << endl; 
+            if(pos1Result == false){
+                // position1 has been taken, try position2
+                position = cardMapping.at(card).at(1); 
+                placeToken(player, position); 
+            //cout << "Played at pos2" << endl; 
+            }
+        } else {
+            // look up the card 
+            pair<int, int> position = cardMapping.at(card).at(1); 
+            bool pos2Result = placeToken(player, position); 
+            //cout << "Pos1Result: " <<  pos1Result << endl; 
+            if(pos2Result == false){
+                // position2 has been taken, try position1
+                position = cardMapping.at(card).at(0); 
+                placeToken(player, position); 
+                //cout << "Played at pos2" << endl; 
+            }
+        }
+        
+    // optimization: 
+    /*
     if(player == 1){
         //vector<int> playerCards = player1Cards;
 
@@ -626,8 +638,6 @@ void Game::playCard(int player){
 
         int card = player1Cards.at(optimalInfo.first);  
    
-        //printPlayerCards(player); 
-        //cout << "Optimal Card: " << card << " " << cardMapping.at(card).at(optimalInfo.second).first << ", " << cardMapping.at(card).at(optimalInfo.second).second << endl; 
         player1Cards.erase(player1Cards.begin() + optimalInfo.first); // 0 can be replace with an array index 
     
         placeToken(player, cardMapping.at(card).at(optimalInfo.second)); 
@@ -648,70 +658,8 @@ void Game::playCard(int player){
     
 
     }
-    
-        // Here is where the strategy comes into play: 
-        // check all your cards and check if you can make a sequence of 5 if not 4, if not 3, etc. 
-        // play the card that will result in the highest sequence
-        // if there is a tie, then pick the one with the lower array index (it was drawn earlier)
-
-        /*
-        // faster, without randomization 
-        // look up the card 
-            pair<int, int> position = cardMapping.at(card).at(0); 
-            bool pos1Result = placeToken(player, position); 
-            //cout << "Pos1Result: " <<  pos1Result << endl; 
-            if(pos1Result == false){
-                // position1 has been taken, try position2
-                position = cardMapping.at(card).at(1); 
-                placeToken(player, position); 
-            //cout << "Played at pos2" << endl; 
-            }
-        */
-       
-    
-
-       // without optimized player card 
-
-
-    
-    /*
-    int card = playerCards->front(); 
-    playerCards->erase(playerCards->begin()); 
-
-        // with randomization on position 1 or 2 
-        random_device rd;
-        mt19937 rng(rd()); 
-        uniform_int_distribution<int> uni(0, 1); 
-        // might need to do: auto random_integer = uni(rng); instead
-        int random_integer = uni (rng); 
-        if(random_integer == 0){
-            // look up the card 
-            pair<int, int> position = cardMapping.at(card).at(0); 
-            bool pos1Result = placeToken(player, position); 
-            //cout << "Pos1Result: " <<  pos1Result << endl; 
-            if(pos1Result == false){
-                // position1 has been taken, try position2
-                position = cardMapping.at(card).at(1); 
-                placeToken(player, position); 
-            //cout << "Played at pos2" << endl; 
-            }
-
-        } else {
-            // look up the card 
-            pair<int, int> position = cardMapping.at(card).at(1); 
-            bool pos2Result = placeToken(player, position); 
-            //cout << "Pos1Result: " <<  pos1Result << endl; 
-            if(pos2Result == false){
-                // position2 has been taken, try position1
-                position = cardMapping.at(card).at(0); 
-                placeToken(player, position); 
-                //cout << "Played at pos2" << endl; 
-            }
-
-        }
     */
     
-        
         
 }
 
@@ -740,6 +688,7 @@ void Game::printPlayerCards(int player){
 pair<int, int> Game::optimalMove(int player){
     // pair->first = index of the playerCards array with the max sequence
     // pair->second = first card or second card?
+
 
     pair<int, int>toReturn = make_pair<int, int>(0, 0); 
 
@@ -851,12 +800,10 @@ pair<int, int> Game::optimalMove(int player){
 
 
 bool Game::placeToken(int player, pair<int, int> location){
-    //cout << "Test: " << location.first << ", " << location.second << endl; 
     // update the gameboard 
     if(gameboard[location.first][location.second] == 0){
  
         gameboard[location.first][location.second] = player; 
-       // cout << "Player " << player << " played at " << location.first << ", " << location.second << endl; 
         lastPlacedToken = location; 
         return true; 
     } 
